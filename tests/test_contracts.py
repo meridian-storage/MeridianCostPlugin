@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import runpy
 from collections.abc import Callable
 from importlib import resources
@@ -63,10 +64,20 @@ def test_source_has_no_superseded_cost_identifiers() -> None:
 
 
 @pytest.mark.contract
-def test_release_recovery_preserves_deterministic_attestation() -> None:
-    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
-    assert "actions/attest-sbom@" not in workflow
-    assert 'document["serialNumber"]' in workflow
-    assert '--source-commit "${{ steps.source.outputs.commit }}"' in workflow
-    assert "github.event_name == 'push' || github.event_name == 'workflow_dispatch'" in workflow
-    assert "skip-existing: true" in workflow
+def test_release_path_is_the_dispatch_only_jumbo_forwarder() -> None:
+    # The release path consolidated into the jumbo-publish forwarder
+    # (Jumbo Build & Versioning Standard, section 3.5): this repository
+    # carries NO release logic of its own. The deterministic-attestation
+    # steps the removed release.yml carried (serialNumber recovery,
+    # --source-commit, skip-existing) moved into the pinned reusable
+    # jumbo-publish workflow in zephytiju/JumboBuild; the local contract
+    # is that the forwarder is dispatch-only, pinned by exact commit,
+    # and embeds no local release logic.
+    forwarder = (ROOT / ".github" / "workflows" / "jumbo-publish.yml").read_text(encoding="utf-8")
+    assert "workflow_dispatch:" in forwarder
+    assert "schedule:" not in forwarder
+    assert "push:" not in forwarder.replace("# ", "")
+    assert "uses: zephytiju/JumboBuild/.github/workflows/jumbo-publish.yml@" in forwarder
+    assert re.search(r"jumbo-publish\.yml@[0-9a-f]{40}", forwarder)
+    assert "runs-on:" not in forwarder
+    assert "attest" not in forwarder.lower().replace("# ", "")
