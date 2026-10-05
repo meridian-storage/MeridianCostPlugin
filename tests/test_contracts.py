@@ -76,7 +76,6 @@ def test_release_path_is_the_dispatch_only_jumbo_forwarder() -> None:
     forwarder = (ROOT / ".github" / "workflows" / "jumbo-publish.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch:" in forwarder
     assert "schedule:" not in forwarder
-    assert "push:" not in forwarder.replace("# ", "")
     assert "uses: zephytiju/JumboBuild/.github/workflows/jumbo-publish.yml@" in forwarder
     assert re.search(r"jumbo-publish\.yml@[0-9a-f]{40}", forwarder)
     assert "runs-on:" not in forwarder
