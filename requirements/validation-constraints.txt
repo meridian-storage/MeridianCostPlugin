@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Exact release-validation selection, not runtime compatibility gates.
 meridian-plugin-usage==2.0.2
-meridian-storage-core==1.1.0
+meridian-storage-core==1.2.0
 meridian-storage-evidence==1.0.2
 meridian-storage-query==1.0.3
 meridian-storage-semantics==2.0.1
